@@ -8,45 +8,45 @@ from imputation.utils import binary_sampler, min_max_normalization
 '''
 
 default_path = "./data/"
-data_name = "news"
+data_name = "complete_wine"
 data_x = pd.read_csv(default_path + data_name + ".csv", keep_default_na=False)
 
 # complete_wine.csv parameters
-# categorical_list = []
-# ordinal_list = ['fixed_acidity', 'free_sulfur_dioxide', 'total_sulfur_dioxide', 'pH', 'quality']
-# numeric_list = list(set(data_x.columns) - set(ordinal_list))
-# parameters = {
-#     'numeric_cols': numeric_list,
-#     'ordinal_cols': ordinal_list,
-#     'categorical_cols': categorical_list,
-#     'pre_batch_size': 256,
-#     'pre_epochs': 1000,
-#     'pre_learning_rate': 1e-3,
-#     'batch_size': 256,
-#     'epochs': 500,
-#     'learning_rate': 1e-3,
-#     'alpha': 1}
-
-# news.csv parameters
-ordinal_list = ['n_tokens_title', 'n_tokens_content', 'num_hrefs', 'num_self_hrefs', 'num_imgs', 'num_videos',
-                'num_keywords', 'kw_min_min', 'kw_max_min', 'kw_min_max', 'kw_max_max', 'self_reference_min_shares',
-                'self_reference_max_shares']
-categorical_list = ['data_channel_is_lifestyle', 'data_channel_is_entertainment', 'data_channel_is_bus',
-                    'data_channel_is_socmed', 'data_channel_is_tech', 'data_channel_is_world',
-                    'weekday_is_monday', 'weekday_is_tuesday', 'weekday_is_wednesday', 'weekday_is_thursday',
-                    'weekday_is_friday', 'weekday_is_saturday', 'weekday_is_sunday', 'is_weekend']
-numeric_list = list(set(data_x.columns) - set(ordinal_list) - set(categorical_list))
+categorical_list = []
+ordinal_list = ['fixed_acidity', 'free_sulfur_dioxide', 'total_sulfur_dioxide', 'pH', 'quality']
+numeric_list = list(set(data_x.columns) - set(ordinal_list))
 parameters = {
     'numeric_cols': numeric_list,
     'ordinal_cols': ordinal_list,
     'categorical_cols': categorical_list,
     'pre_batch_size': 256,
-    'pre_epochs': 50,
+    'pre_epochs': 1000,
     'pre_learning_rate': 1e-3,
     'batch_size': 256,
-    'epochs': 20,
-    'learning_rate': 1e-4,
+    'epochs': 500,
+    'learning_rate': 1e-3,
     'alpha': 1}
+
+# news.csv parameters
+# ordinal_list = ['n_tokens_title', 'n_tokens_content', 'num_hrefs', 'num_self_hrefs', 'num_imgs', 'num_videos',
+#                 'num_keywords', 'kw_min_min', 'kw_max_min', 'kw_min_max', 'kw_max_max', 'self_reference_min_shares',
+#                 'self_reference_max_shares']
+# categorical_list = ['data_channel_is_lifestyle', 'data_channel_is_entertainment', 'data_channel_is_bus',
+#                     'data_channel_is_socmed', 'data_channel_is_tech', 'data_channel_is_world',
+#                     'weekday_is_monday', 'weekday_is_tuesday', 'weekday_is_wednesday', 'weekday_is_thursday',
+#                     'weekday_is_friday', 'weekday_is_saturday', 'weekday_is_sunday', 'is_weekend']
+# numeric_list = list(set(data_x.columns) - set(ordinal_list) - set(categorical_list))
+# parameters = {
+#     'numeric_cols': numeric_list,
+#     'ordinal_cols': ordinal_list,
+#     'categorical_cols': categorical_list,
+#     'pre_batch_size': 256,
+#     'pre_epochs': 50,
+#     'pre_learning_rate': 1e-3,
+#     'batch_size': 256,
+#     'epochs': 20,
+#     'learning_rate': 1e-4,
+#     'alpha': 1}
 
 # diabetes.csv parameter
 # categorical_list = []

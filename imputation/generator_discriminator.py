@@ -193,7 +193,7 @@ def imputation(data, parameters):
 
     def pre_encoder(data):
         # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(X, theta_pre_Enc[0][0]) + theta_pre_Enc[0][1])
+        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_pre_Enc[0][0]) + theta_pre_Enc[0][1])
         tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_pre_Enc[1][0]) + theta_pre_Enc[1][1])
         tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_pre_Enc[2][0]) + theta_pre_Enc[2][1])
         tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_pre_Enc[3][0]) + theta_pre_Enc[3][1])
@@ -207,7 +207,7 @@ def imputation(data, parameters):
 
     def encoder(data):
         # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(X, theta_Enc[0][0]) + theta_Enc[0][1])
+        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_Enc[0][0]) + theta_Enc[0][1])
         tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_Enc[1][0]) + theta_Enc[1][1])
         tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_Enc[2][0]) + theta_Enc[2][1])
         tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_Enc[3][0]) + theta_Enc[3][1])
@@ -222,7 +222,7 @@ def imputation(data, parameters):
     def generator(incomplete_data):
         # incomplete_data: incomplete_data
         # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(X, theta_Enc[0][0]) + theta_Enc[0][1])
+        tmp_latent0 = tf.nn.tanh(tf.matmul(incomplete_data, theta_Enc[0][0]) + theta_Enc[0][1])
         tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_Enc[1][0]) + theta_Enc[1][1])
         tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_Enc[2][0]) + theta_Enc[2][1])
         tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_Enc[3][0]) + theta_Enc[3][1])
