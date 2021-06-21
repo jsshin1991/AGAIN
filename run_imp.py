@@ -3,10 +3,6 @@ import numpy as np
 from imputation.generator_discriminator import imputation
 from imputation.utils import binary_sampler, min_max_normalization
 
-'''
-- pre_epochs >> epochs 
-'''
-
 default_path = "./data/"
 data_name = "complete_wine"
 data_x = pd.read_csv(default_path + data_name + ".csv", keep_default_na=False)
@@ -89,11 +85,11 @@ parameters = {
 #     'ordinal_cols': ordinal_list,
 #     'categorical_cols': categorical_list,
 #     'pre_batch_size': 256,
-#     'pre_epochs': 100,
-#     'pre_learning_rate': 1e-3,
+#     'pre_epochs': 20,
+#     'pre_learning_rate': 1e-4,
 #     'batch_size': 256,
-#     'epochs': 50,
-#     'learning_rate': 1e-3,
+#     'epochs': 100,
+#     'learning_rate': 1e-4,
 #     'alpha': 10}
 
 # breast_cancer.csv parameters
@@ -107,7 +103,7 @@ parameters = {
 #     'pre_batch_size': 256,
 #     'pre_epochs': 1000,
 #     'pre_learning_rate': 1e-3,
-#     'batch_size': 256,
+#     'batch_size': 56,
 #     'epochs': 500,
 #     'learning_rate': 1e-4,
 #     'alpha': 10}

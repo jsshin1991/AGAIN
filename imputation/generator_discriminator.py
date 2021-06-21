@@ -219,10 +219,9 @@ def imputation(data, parameters):
         latent = tf.matmul(tmp_latent4, theta_Enc[5][0]) + theta_Enc[5][1]
         return latent
 
-    def generator(incomplete_data):
-        # incomplete_data: incomplete_data
+    def generator(data):
         # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(incomplete_data, theta_Enc[0][0]) + theta_Enc[0][1])
+        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_Enc[0][0]) + theta_Enc[0][1])
         tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_Enc[1][0]) + theta_Enc[1][1])
         tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_Enc[2][0]) + theta_Enc[2][1])
         tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_Enc[3][0]) + theta_Enc[3][1])
@@ -290,7 +289,7 @@ def imputation(data, parameters):
         Disc_prob = tf.nn.sigmoid(tf.matmul(Disc_h3, theta_Disc[4][0]) + theta_Disc[4][1])
         return Disc_prob
 
-    generated_sample, dec = generator(incomplete_data=X)
+    generated_sample, dec = generator(data=X)
     Hat_X = encoder(data=X)
     D_prob_imputed = discriminator(data=Hat_X)
     D_prob_complete = discriminator(data=pre_encoder(CX))
