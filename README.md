@@ -10,7 +10,7 @@ Missing Data Imputation, Generative Adversarial Networks, Autoencoder, Transfer 
 # Dataset
 All datasets (Wine, Letter, Diabetes, News, Credit Card, Breast Cancer, Spam) used in the experiments can be found in the 'data' directory. (All of them can be found in Kaggle or UCI Machine Learning Dataset.)
 
-**Python Library Version**:
+# Python Library Version
 - pandas == 0.25.3
 - numpy == 1.14.5
 - tensorflow == 1.10.0
