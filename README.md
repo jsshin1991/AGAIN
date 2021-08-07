@@ -6,10 +6,12 @@ We propose a novel generative method for imputing missing data by applying the C
 
 
 **Keywords**
+
 Missing Data Imputation, Generative Adversarial Networks, Autoencoder, Transfer Learning, Deep Learning
 
 
 **Dataset**
+
 All datasets (Wine, Letter, Diabetes, News, Credit Card, Breast Cancer, Spam) used in the experiments can be found in the 'data' directory. (All of them can be found in Kaggle or UCI Machine Learning Dataset.)
 
 
