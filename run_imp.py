@@ -41,13 +41,14 @@ def run_imp(data_name, missing_rate):
 
         print("")
         print("Missing Rate: " + str(miss_rate))
-        print("rmse_list: " + str(rmse_list))
-        print("rmse_avg: " + str(sum(rmse_list) / len(rmse_list)))
+        print("normalized_rmse_list: " + str(rmse_list))
+        print("normalized_rmse_avg: " + str(sum(rmse_list) / len(rmse_list)))
         print("")
 
 
 if __name__ == '__main__':
-    data_name = "complete_wine"
+    # ['complete_wine', 'news', 'diabetes', 'letter', 'spam', 'breast_cancer', 'credit_card']
+    data_name = "breast_cancer"
     missing_rate = [0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]
 
     run_imp(data_name, missing_rate)

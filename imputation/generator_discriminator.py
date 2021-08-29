@@ -1,13 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from functools import reduce
 from tqdm import tqdm
-
-from imputation.utils import xavier_init, sample_batch_index, preprocessing, rounding
+from imputation.utils import sample_batch_index, preprocessing, rounding
 from imputation.pre_training import pre_training
-
+from imputation.utils_imp import *
 
 def imputation(data, parameters):
     '''
@@ -86,213 +83,23 @@ def imputation(data, parameters):
     # Generator variables
     # pre_trained Encoder weights
     theta_pre_Enc = []
-    pre_enc_train = False
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[0], name='Encoder_W0', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[1], name='Encoder_B0', trainable=pre_enc_train)])
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[2], name='Encoder_W1', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[3], name='Encoder_B1', trainable=pre_enc_train)])
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[4], name='Encoder_W2', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[5], name='Encoder_B2', trainable=pre_enc_train)])
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[6], name='Encoder_W3', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[7], name='Encoder_B3', trainable=pre_enc_train)])
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[8], name='Encoder_W4', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[9], name='Encoder_B4', trainable=pre_enc_train)])
-    theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[10], name='Encoder_W5', trainable=pre_enc_train),
-                          tf.Variable(initial_value=encoder_weights[11], name='Encoder_B5', trainable=pre_enc_train)])
-    # theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[12], name='Encoder_W6', trainable=pre_enc_train),
-    #                       tf.Variable(initial_value=encoder_weights[13], name='Encoder_B6', trainable=pre_enc_train)])
-    # theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[14], name='Encoder_W7', trainable=pre_enc_train),
-    #                       tf.Variable(initial_value=encoder_weights[15], name='Encoder_B7', trainable=pre_enc_train)])
-    # theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[16], name='Encoder_W6', trainable=pre_enc_train),
-    #                       tf.Variable(initial_value=encoder_weights[17], name='Encoder_B6', trainable=pre_enc_train)])
-    # theta_pre_Enc.append([tf.Variable(initial_value=encoder_weights[18], name='Encoder_W7', trainable=pre_enc_train),
-    #                       tf.Variable(initial_value=encoder_weights[19], name='Encoder_B7', trainable=pre_enc_train)])
+    set_pre_encoder(theta_pre_Enc, encoder_weights, trainable=False)
 
     # Encoder weights
     theta_Enc = []
-    enc_train = True
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[0], name='Encoder_W0', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[1], name='Encoder_B0', trainable=enc_train)])
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[2], name='Encoder_W1', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[3], name='Encoder_B1', trainable=enc_train)])
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[4], name='Encoder_W2', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[5], name='Encoder_B2', trainable=enc_train)])
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[6], name='Encoder_W3', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[7], name='Encoder_B3', trainable=enc_train)])
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[8], name='Encoder_W4', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[9], name='Encoder_B4', trainable=enc_train)])
-    theta_Enc.append([tf.Variable(initial_value=encoder_weights[10], name='Encoder_W5', trainable=enc_train),
-                      tf.Variable(initial_value=encoder_weights[11], name='Encoder_B5', trainable=enc_train)])
-    # theta_Enc.append([tf.Variable(initial_value=encoder_weights[12], name='Encoder_W6', trainable=enc_train),
-    #                   tf.Variable(initial_value=encoder_weights[13], name='Encoder_B6', trainable=enc_train)])
-    # theta_Enc.append([tf.Variable(initial_value=encoder_weights[14], name='Encoder_W7', trainable=enc_train),
-    #                   tf.Variable(initial_value=encoder_weights[15], name='Encoder_B7', trainable=enc_train)])
-    # theta_Enc.append([tf.Variable(initial_value=encoder_weights[16], name='Encoder_W8', trainable=enc_train),
-    #                   tf.Variable(initial_value=encoder_weights[17], name='Encoder_B8', trainable=enc_train)])
-    # theta_Enc.append([tf.Variable(initial_value=encoder_weights[18], name='Encoder_W9', trainable=enc_train),
-    #                   tf.Variable(initial_value=encoder_weights[19], name='Encoder_B9', trainable=enc_train)])
+    set_encoder(theta_Enc, encoder_weights, trainable=True)
 
     # Decoder weights
     theta_Dec = []
-    dec_train = False
-    cat_start_idx = 0
-    # decoder weights for numeric data (non-trainable)
-    if numeric_dim > 0:
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[0], name='Decoder_Num_W0', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[1], name='Decoder_Num_B0', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[2], name='Decoder_Num_W1', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[3], name='Decoder_Num_B1', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[4], name='Decoder_Num_W2', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[5], name='Decoder_Num_B2', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[6], name='Decoder_Num_W3', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[7], name='Decoder_Num_B3', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[8], name='Decoder_Num_W4', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[9], name='Decoder_Num_B4', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[10], name='Decoder_Num_W5', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[11], name='Decoder_Num_B5', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[12], name='Decoder_Num_W6', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[13], name='Decoder_Num_B6', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[14], name='Decoder_Num_W7', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[15], name='Decoder_Num_B7', trainable=dec_train)])
-
-        cat_start_idx = 16
-    # decoder weights for categorical data (non-trainable)
-    for idx in range(len(categorical_cols)):
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W1', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 1 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B1', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 2 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W2', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 3 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B2', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 4 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W3', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 5 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B3', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 6 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W1', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 7 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B1', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 8 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W2', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 9 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B2', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 10 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W3', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 11 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B3', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 12 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W3', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 13 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B3', trainable=dec_train)])
-        theta_Dec.append([tf.Variable(initial_value=decoder_weights[cat_start_idx + 14 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_W3', trainable=dec_train),
-                          tf.Variable(initial_value=decoder_weights[cat_start_idx + 15 + 16 * idx],
-                                      name='Decoder_' + categorical_cols[idx] + '_B3', trainable=dec_train)])
-
-    def pre_encoder(data):
-        # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_pre_Enc[0][0]) + theta_pre_Enc[0][1])
-        tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_pre_Enc[1][0]) + theta_pre_Enc[1][1])
-        tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_pre_Enc[2][0]) + theta_pre_Enc[2][1])
-        tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_pre_Enc[3][0]) + theta_pre_Enc[3][1])
-        tmp_latent4 = tf.nn.tanh(tf.matmul(tmp_latent3, theta_pre_Enc[4][0]) + theta_pre_Enc[4][1])
-        # tmp_latent5 = tf.nn.tanh(tf.matmul(tmp_latent4, theta_pre_Enc[5][0]) + theta_pre_Enc[5][1])
-        # tmp_latent6 = tf.nn.tanh(tf.matmul(tmp_latent5, theta_pre_Enc[6][0]) + theta_pre_Enc[6][1])
-        # tmp_latent7 = tf.nn.tanh(tf.matmul(tmp_latent6, theta_pre_Enc[7][0]) + theta_pre_Enc[7][1])
-        # tmp_latent8 = tf.nn.tanh(tf.matmul(tmp_latent7, theta_pre_Enc[8][0]) + theta_pre_Enc[8][1])
-        latent = tf.matmul(tmp_latent4, theta_pre_Enc[5][0]) + theta_pre_Enc[5][1]
-        return latent
-
-    def encoder(data):
-        # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_Enc[0][0]) + theta_Enc[0][1])
-        tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_Enc[1][0]) + theta_Enc[1][1])
-        tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_Enc[2][0]) + theta_Enc[2][1])
-        tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_Enc[3][0]) + theta_Enc[3][1])
-        tmp_latent4 = tf.nn.tanh(tf.matmul(tmp_latent3, theta_Enc[4][0]) + theta_Enc[4][1])
-        # tmp_latent5 = tf.nn.tanh(tf.matmul(tmp_latent4, theta_Enc[5][0]) + theta_Enc[5][1])
-        # tmp_latent6 = tf.nn.tanh(tf.matmul(tmp_latent5, theta_Enc[6][0]) + theta_Enc[6][1])
-        # tmp_latent7 = tf.nn.tanh(tf.matmul(tmp_latent6, theta_Enc[7][0]) + theta_Enc[7][1])
-        # tmp_latent8 = tf.nn.tanh(tf.matmul(tmp_latent7, theta_Enc[8][0]) + theta_Enc[8][1])
-        latent = tf.matmul(tmp_latent4, theta_Enc[5][0]) + theta_Enc[5][1]
-        return latent
-
-    def generator(data):
-        # Auto-encoder (Generator) structure
-        tmp_latent0 = tf.nn.tanh(tf.matmul(data, theta_Enc[0][0]) + theta_Enc[0][1])
-        tmp_latent1 = tf.nn.tanh(tf.matmul(tmp_latent0, theta_Enc[1][0]) + theta_Enc[1][1])
-        tmp_latent2 = tf.nn.tanh(tf.matmul(tmp_latent1, theta_Enc[2][0]) + theta_Enc[2][1])
-        tmp_latent3 = tf.nn.tanh(tf.matmul(tmp_latent2, theta_Enc[3][0]) + theta_Enc[3][1])
-        tmp_latent4 = tf.nn.tanh(tf.matmul(tmp_latent3, theta_Enc[4][0]) + theta_Enc[4][1])
-        # tmp_latent5 = tf.nn.tanh(tf.matmul(tmp_latent4, theta_Enc[5][0]) + theta_Enc[5][1])
-        # tmp_latent6 = tf.nn.tanh(tf.matmul(tmp_latent5, theta_Enc[6][0]) + theta_Enc[6][1])
-        # tmp_latent7 = tf.nn.tanh(tf.matmul(tmp_latent6, theta_Enc[7][0]) + theta_Enc[7][1])
-        # tmp_latent8 = tf.nn.tanh(tf.matmul(tmp_latent7, theta_Enc[8][0]) + theta_Enc[8][1])
-        latent = tf.matmul(tmp_latent4, theta_Enc[5][0]) + theta_Enc[5][1]
-        # Decoder structure
-        dec = []
-        cat_start_idx = 0
-        if numeric_dim > 0:
-            # add layer for numerics
-            numeric_latent0 = tf.nn.tanh(tf.matmul(latent, theta_Dec[0][0]) + theta_Dec[0][1])
-            numeric_latent1 = tf.nn.tanh(tf.matmul(numeric_latent0, theta_Dec[1][0]) + theta_Dec[1][1])
-            numeric_latent2 = tf.nn.tanh(tf.matmul(numeric_latent1, theta_Dec[2][0]) + theta_Dec[2][1])
-            numeric_latent3 = tf.nn.tanh(tf.matmul(numeric_latent2, theta_Dec[3][0]) + theta_Dec[3][1])
-            numeric_latent4 = tf.nn.tanh(tf.matmul(numeric_latent3, theta_Dec[4][0]) + theta_Dec[4][1])
-            numeric_latent5 = tf.nn.tanh(tf.matmul(numeric_latent4, theta_Dec[5][0]) + theta_Dec[5][1])
-            numeric_latent6 = tf.nn.tanh(tf.matmul(numeric_latent5, theta_Dec[6][0]) + theta_Dec[6][1])
-            dec.append(tf.matmul(numeric_latent6, theta_Dec[7][0]) + theta_Dec[7][1])
-            cat_start_idx = 8
-        # add layer for categorical
-        for i in range(cat_start_idx, len(theta_Dec), 8):
-            dec_latent0 = tf.nn.tanh(tf.matmul(latent, theta_Dec[i][0]) + theta_Dec[i][1])
-            dec_latent1 = tf.nn.tanh(tf.matmul(dec_latent0, theta_Dec[i + 1][0]) + theta_Dec[i + 1][1])
-            dec_latent2 = tf.nn.tanh(tf.matmul(dec_latent1, theta_Dec[i + 2][0]) + theta_Dec[i + 2][1])
-            dec_latent3 = tf.nn.tanh(tf.matmul(dec_latent2, theta_Dec[i + 3][0]) + theta_Dec[i + 3][1])
-            dec_latent4 = tf.nn.tanh(tf.matmul(dec_latent3, theta_Dec[i + 4][0]) + theta_Dec[i + 4][1])
-            dec_latent5 = tf.nn.tanh(tf.matmul(dec_latent4, theta_Dec[i + 5][0]) + theta_Dec[i + 5][1])
-            dec_latent = tf.nn.tanh(tf.matmul(dec_latent5, theta_Dec[i + 6][0]) + theta_Dec[i + 6][1])
-            if theta_Dec[i + 7][0].shape[1] > 1:
-                dec.append(tf.nn.softmax(tf.matmul(dec_latent, theta_Dec[i + 7][0]) + theta_Dec[i + 7][1]))
-            else:
-                dec.append(tf.nn.sigmoid(tf.matmul(dec_latent, theta_Dec[i + 7][0]) + theta_Dec[i + 7][1]))
-        # Output
-        outputs = tf.concat(values=dec, axis=1)
-        return outputs, dec
-
-    # Discriminator weights
-    l_dim = int(dim * 0.7)
-    l1_dim = int(l_dim * 0.7)
-    l2_dim = int(l_dim * 0.3)
+    set_dec(theta_Dec, decoder_weights, numeric_dim, categorical_cols, trainable=False)
 
     theta_Disc = []
-    theta_Disc.append([tf.Variable(xavier_init([l_dim, l1_dim]), name='Discriminator_W0'),
-                       tf.Variable(tf.zeros([l1_dim]), name='Discriminator_b0')])
-    theta_Disc.append([tf.Variable(xavier_init([l1_dim, l1_dim]), name='Discriminator_W1'),
-                       tf.Variable(tf.zeros([l1_dim]), name='Discriminator_b1')])
-    theta_Disc.append([tf.Variable(xavier_init([l1_dim, l2_dim]), name='Discriminator_W2'),
-                       tf.Variable(tf.zeros([l2_dim]), name='Discriminator_b2')])
-    theta_Disc.append([tf.Variable(xavier_init([l2_dim, l2_dim]), name='Discriminator_W3'),
-                       tf.Variable(tf.zeros([l2_dim]), name='Discriminator_b3')])
-    theta_Disc.append([tf.Variable(xavier_init([l2_dim, 1]), name='Discriminator_W4'),
-                       tf.Variable(tf.zeros([1]), name='Discriminator_b4')])
+    set_disc(theta_Disc, dim)
 
-    def discriminator(data):
-        # imputed_data: outputs (of generator function)
-        # Discriminator structure
-        Disc_h0 = tf.nn.tanh(tf.matmul(data, theta_Disc[0][0]) + theta_Disc[0][1])
-        Disc_h1 = tf.nn.tanh(tf.matmul(Disc_h0, theta_Disc[1][0]) + theta_Disc[1][1])
-        Disc_h2 = tf.nn.tanh(tf.matmul(Disc_h1, theta_Disc[2][0]) + theta_Disc[2][1])
-        Disc_h3 = tf.nn.tanh(tf.matmul(Disc_h2, theta_Disc[3][0]) + theta_Disc[3][1])
-        Disc_prob = tf.nn.sigmoid(tf.matmul(Disc_h3, theta_Disc[4][0]) + theta_Disc[4][1])
-        return Disc_prob
-
-    generated_sample, dec = generator(data=X)
-    Hat_X = encoder(data=X)
-    D_prob_imputed = discriminator(data=Hat_X)
-    D_prob_complete = discriminator(data=pre_encoder(CX))
+    generated_sample, dec = generator(X, theta_Enc, theta_Dec, numeric_dim)
+    Hat_X = encoder(X, theta_Enc)
+    D_prob_imputed = discriminator(Hat_X, theta_Disc)
+    D_prob_complete = discriminator(pre_encoder(CX, theta_pre_Enc), theta_Disc)
 
     # Loss
     D_loss = -tf.reduce_mean(tf.log(D_prob_complete + 1e-12) + tf.log(1 - D_prob_imputed + 1e-12))
